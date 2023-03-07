@@ -4,11 +4,13 @@ import java.io.*;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import utilitaire.Utilitaire;
-
+import java.util.HashMap;
+import etu1811.framework.Mapping;
 
 public class FrontServlet extends HttpServlet {
+    HashMap<String, Mapping> MappingUrls;
 
-    protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req,ss HttpServletResponse res) throws ServletException, IOException {
         PrintWriter out = res.getWriter();
         try {
             String contextUrl = processRequest(res, req);
