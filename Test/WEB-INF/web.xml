@@ -18,13 +18,13 @@
         <init-param>
             <param-name>pathClass</param-name>
             <param-value>/WEB-INF/classes</param-value>
-            <decription>Path to your classes</decription>
+            <decription>Chemin vers les classes</decription>
         </init-param>
     </servlet>
 
     <servlet-mapping>
         <servlet-name>FrontServlet</servlet-name>
-        <url-pattern>/</url-pattern>
+        <url-pattern>*.do</url-pattern>
     </servlet-mapping>
     
 </web-app>

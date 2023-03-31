@@ -6,6 +6,7 @@ import jakarta.servlet.http.*;
 import utilities.*;
 import java.util.HashMap;
 import etu1811.framework.Mapping;
+import etu1811.framework.ModelView;
 import java.util.Vector;
 import java.lang.reflect.Method;
 import Annotation.*;
@@ -24,60 +25,43 @@ public class FrontServlet extends HttpServlet {
         String pathToClasses = this.getInitParameter("pathClass");
         String classesPath = this.getServletContext().getRealPath(pathToClasses);
 
-            try{
-              this.classes = utile.getAllClasses(classesPath + "\\", classesPath, new Vector<Class<?>>());
-              utile.setMappingUrls(this.MappingUrls,this.classes);
-          }catch (Exception e) {
+        try{
+          this.classes = utile.getAllClasses(classesPath + "\\", classesPath, new Vector<Class<?>>());
+          utile.setMappingUrls(this.MappingUrls,this.classes);
+      }catch (Exception e) {
               //erreur
-          }
-
-
-
+      }
   }
 
 
   protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
     PrintWriter out = res.getWriter();
+    res.setContentType( "text/html" );
+    try {
+       Utilitaire utile = new Utilitaire();
+       String contextUrl = processRequest(res, req).replace("/","");
+       HashMap<String,Mapping> contextInfo = utile.getContextInformation(this.MappingUrls,contextUrl);
 
-        try {
-         Utilitaire utile = new Utilitaire();
-         String contextUrl = processRequest(res, req).replace("/","");
-         HashMap<String,Mapping> contextInfo = utile.getContextInformation(this.MappingUrls,contextUrl);
-         for (String key : contextInfo.keySet()) {
-            out.println(key);
-            out.println("Classe => " + contextInfo.get(key).getClassName());
-            out.println("Fonction => " + contextInfo.get(key).getMethod());
-            out.println("");
-        }
-
-        
-
-
-
-
-
-
-    } catch (Exception e) {
-        out.println("Exception: " + e.getMessage());
-    }
+       ModelView modelView = utile.callFunction(contextInfo);
+       RequestDispatcher dispatcher = req.getServletContext().getRequestDispatcher(modelView.getView());
+       dispatcher.forward(req, res);
+       
+   } catch (Exception e) {
+    out.println("Exception: " + e.getMessage());
 }
+}
+
+
 
 protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
     PrintWriter out = res.getWriter();
-        try {
-         Utilitaire utile = new Utilitaire();
-         String contextUrl = processRequest(res, req).replace("/","");
-         HashMap<String,Mapping> contextInfo = utile.getContextInformation(this.MappingUrls,contextUrl);
-         for (String key : contextInfo.keySet()) {
-            out.println(key);
-            out.println("Classe : " + contextInfo.get(key).getClassName());
-            out.println("fonction : " + contextInfo.get(key).getMethod());
-            out.println("");
-        }
-
-    } catch (Exception e) {
-        out.println("Exception: " + e.getMessage());
-    }
+    try {
+       Utilitaire utile = new Utilitaire();
+       String contextUrl = processRequest(res, req).replace("/","");
+       HashMap<String,Mapping> contextInfo = utile.getContextInformation(this.MappingUrls,contextUrl);
+   } catch (Exception e) {
+    out.println("Exception: " + e.getMessage());
+}
 }
 
 
@@ -85,13 +69,13 @@ public String processRequest(HttpServletResponse res, HttpServletRequest req) th
     Utilitaire utile = new Utilitaire();
     PrintWriter out = res.getWriter();
     String result = "";
-        try{
-            StringBuffer url = req.getRequestURL(); //url iray manonontolo
-            result = utile.getContextUrl(url);
-        }catch (Exception e) {
-            out.println("Exception: " + e.getMessage());
-        }
-        return result;
+    try{
+        StringBuffer url = req.getRequestURL();
+        result = utile.getContextUrl(url);
+    }catch (Exception e) {
+        out.println("Exception: " + e.getMessage());
     }
+    return result;
+}
 
 }
