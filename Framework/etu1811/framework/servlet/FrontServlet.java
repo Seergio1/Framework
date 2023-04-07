@@ -43,6 +43,10 @@ public class FrontServlet extends HttpServlet {
        HashMap<String,Mapping> contextInfo = utile.getContextInformation(this.MappingUrls,contextUrl);
 
        ModelView modelView = utile.callFunction(contextInfo);
+       HashMap<String,Object> data = modelView.getData();
+       for (String nomVariable : data.keySet()) {
+           req.setAttribute(nomVariable,data.get(nomVariable));
+       }
        RequestDispatcher dispatcher = req.getServletContext().getRequestDispatcher(modelView.getView());
        dispatcher.forward(req, res);
        
