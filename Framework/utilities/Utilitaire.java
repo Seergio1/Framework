@@ -90,7 +90,7 @@ public ModelView callFunction(HashMap<String,Mapping> map){
         for (String key : map.keySet()) {
             myClass = Class.forName(map.get(key).getClassName());
             Method method = myClass.getDeclaredMethod(map.get(key).getMethod());
-            modelView = (ModelView)method.invoke(myClass.newInstance());
+            modelView = (ModelView)method.invoke(myClass.getDeclaredConstructor().newInstance());
             
         }
     }catch (Exception e) {
@@ -98,6 +98,11 @@ public ModelView callFunction(HashMap<String,Mapping> map){
     }
     return modelView;
     
+}
+
+public String capitalizeFirstLetter(String string) {
+    char firstChar = Character.toUpperCase(string.charAt(0));
+    return firstChar + string.substring(1);
 }
 
 
