@@ -2,10 +2,15 @@ package utilities;
 import java.lang.StringBuffer;
 import java.util.HashMap;
 import java.util.Vector;
+
+import javax.print.DocFlavor.STRING;
+
 import java.io.File;
 import etu1811.framework.Mapping;
 import etu1811.framework.ModelView;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+
 import Annotation.*;
 
 public class Utilitaire {
@@ -69,6 +74,7 @@ public void setMappingUrls(HashMap<String,Mapping> map, Vector<Class<?>> allClas
     System.out.println(e.getMessage());
 }
 }
+
 public HashMap<String,Mapping> getContextInformation(HashMap<String,Mapping> MappingUrls,String annotationChemin){
     Mapping mapping;
     HashMap<String,Mapping> map = new  HashMap<String,Mapping>();
@@ -103,6 +109,50 @@ public ModelView callFunction(HashMap<String,Mapping> map){
 public String capitalizeFirstLetter(String string) {
     char firstChar = Character.toUpperCase(string.charAt(0));
     return firstChar + string.substring(1);
+}
+
+
+public Boolean isMethodHaveParam(Vector<Class<?>> allClasses,String annotation){
+    Vector<Class<?>> classes = new Vector<Class<?>>();
+    Vector<String> paramMethod = new Vector<String>();
+    try{
+        classes = allClasses;
+
+        for (Class<?> class1 : classes) {
+            Method[] methods = class1.getDeclaredMethods();
+            for (int i = 0; i < methods.length; i++) {
+                
+             if (methods[i].isAnnotationPresent(MethodAnnotation.class)) {
+               
+                if(methods[i].getAnnotation(MethodAnnotation.class).chemin().equals(annotation)){
+                   return true;
+                }                       
+           }    
+       }
+   }
+
+}catch(Exception e){
+    System.out.println(e.getMessage());
+}
+    return false;
+}
+public Method getMethodWithParam(Method[] allMethods,String annotation){
+   Method resultat = null;
+    try{
+            for (int i = 0; i < allMethods.length; i++) {
+                
+             if (allMethods[i].isAnnotationPresent(MethodAnnotation.class)) {
+               
+                if(allMethods[i].getAnnotation(MethodAnnotation.class).chemin().equals(annotation)){
+                   resultat = allMethods[i];                   
+           }    
+       }
+   }
+
+}catch(Exception e){
+    System.out.println(e.getMessage());
+}
+    return resultat;
 }
 
 
