@@ -3,12 +3,17 @@
 	pageEncoding="UTF-8"
 %>
 <% 
-    if(request.getAttribute("id")!=null){
-        int id = Integer.parseInt((String)request.getAttribute("id")); 
-        out.println(id);
-    }else{
-        String nom = (String)request.getParameter("nom");
-        out.println(nom);
+    try{
+        if(request.getAttribute("id")!=null){
+            int id = Integer.parseInt((String)request.getAttribute("id")); 
+            out.println(id);
+        }else{
+            String nom = (String)request.getAttribute("nom");
+            Double prix = Double.parseDouble((String)request.getAttribute("prix"));
+            out.println(nom+","+prix);
+        }
+    }catch(Exception e){
+        out.println(e.getMessage());
     }
     
 %>

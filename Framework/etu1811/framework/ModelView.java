@@ -9,6 +9,7 @@ public class ModelView{
 		
 	}
 
+
 	public String getView(){
 		return this.view;
 	}

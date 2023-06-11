@@ -9,5 +9,6 @@ import java.lang.annotation.Retention;
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface MethodAnnotation{
 		String chemin();
+		String[] parametre();
 	}
 	
