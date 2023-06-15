@@ -2,6 +2,7 @@ package etu1811.framework.servlet;
 
 import java.io.*;
 import jakarta.servlet.*;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.*;
 import utilities.*;
 
@@ -10,6 +11,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
+import etu1811.framework.FileUpload;
 import etu1811.framework.Mapping;
 import etu1811.framework.ModelView;
 import java.util.Vector;
@@ -22,8 +24,10 @@ import java.time.LocalDate;
 
 import Annotation.*;
 
+@MultipartConfig(maxFileSize=20000000)
 public class FrontServlet extends HttpServlet {
     HashMap<String, Mapping> MappingUrls;
+    HashMap<String,Object> allClassSingleton; 
     Vector<Class<?>> classes;
 
     @Override
@@ -32,6 +36,7 @@ public class FrontServlet extends HttpServlet {
         Utilitaire utile = new Utilitaire();
         this.classes = new Vector<Class<?>>();
         this.MappingUrls = new HashMap<String,Mapping>();
+        this.allClassSingleton = new HashMap<String,Object>();
 
         String pathToClasses = this.getInitParameter("pathClass");
         String classesPath = this.getServletContext().getRealPath(pathToClasses);
@@ -39,6 +44,7 @@ public class FrontServlet extends HttpServlet {
         try{
           this.classes = utile.getAllClasses(classesPath + "\\", classesPath, new Vector<Class<?>>());
           utile.setMappingUrls(this.MappingUrls,this.classes);
+          utile.setAllClassSingleton(this.allClassSingleton, this.classes);
       }catch (Exception e) {
               //erreur
       }
@@ -49,22 +55,69 @@ public class FrontServlet extends HttpServlet {
     PrintWriter out = res.getWriter();
     res.setContentType( "text/html" );
     try {
-       Utilitaire utile = new Utilitaire();
-       String contextUrl = processRequest(res, req).replace("/","");
-       HashMap<String,Mapping> contextInfo = utile.getContextInformation(this.MappingUrls,contextUrl);
-    //    out.println(contextUrl);
+        processRequest(res, req);
+   } catch (Exception e) {
+    out.println("ExceptionGET: " + e.getMessage());
+}
+}
 
-       ModelView modelView = utile.callFunction(contextInfo);
+
+
+protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+    PrintWriter out = res.getWriter();
+    try {
+       processRequest(res, req);
+   } catch (Exception e) {
+    out.println("ExceptionPOST: " + e.getMessage());
+}
+}
+
+
+public void processRequest(HttpServletResponse res, HttpServletRequest req) throws Exception {
+    Utilitaire utile = new Utilitaire();
+    PrintWriter out = res.getWriter();
+    try{
+        StringBuffer url = req.getRequestURL();
+        String contextUrl = utile.getContextUrl(url).replace("/", "");
+        HashMap<String,Mapping> contextInfo = utile.getContextInformation(this.MappingUrls,contextUrl);
+
        
+      
         Class<?> class1 = Class.forName(contextInfo.get(contextUrl).getClassName());
-        Object o = class1.getDeclaredConstructor().newInstance();
+        Object o;
+        if(utile.checkIfSingleton(class1)){
+            o = utile.getClassMatch(this.allClassSingleton,class1);
+            utile.resetAttribut(o);
+            out.println(o);
+        }else{
+            o = class1.getDeclaredConstructor().newInstance();
+            out.println(o);
+        }
+        
+        ModelView modelView = utile.callFunction(contextInfo,o);
         Field[] fields = o.getClass().getDeclaredFields();
-        Method[] method = class1.getDeclaredMethods(); //toutes les methodes présent
+        Method[] method = o.getClass().getDeclaredMethods(); //toutes les methodes présent
         Method resultat = utile.getMethodWithParam(method, contextUrl);//methode appelée
         String fieldname;
         String value;
+
+        
         
         for(Field f : fields){
+            //upload fichier
+            if(f.getType().equals("FileUpload")){
+                //info sur l'input type file
+                Part filepart= req.getPart("file");
+                
+                if (filepart != null) {
+                    String filename = filepart.getSubmittedFileName();
+                    byte[] filebyte = new byte[(int) filepart.getSize()];
+                    filepart.getInputStream().read(filebyte);
+                    FileUpload file_uplaod = new FileUpload(filename,modelView.getPathUpload(),filebyte);
+                    file_uplaod.uploadFichier();
+                }
+            }
+            //----------------------------------------------------------------------------------------------
             fieldname = f.getName();
             value = req.getParameter(fieldname);
             //si la fonction n'a pas de paramètre
@@ -102,6 +155,9 @@ public class FrontServlet extends HttpServlet {
                    Object m = o.getClass().getMethod("get"+utile.capitalizeFirstLetter(fieldname)).invoke(o);
                    modelView.addItem(fieldname, value);
                 }
+                
+                
+                
             }
             
         }
@@ -134,42 +190,14 @@ public class FrontServlet extends HttpServlet {
                     req.setAttribute(nomVariable,data.get(nomVariable));
                 }
             }
+            
             RequestDispatcher dispatcher = req.getServletContext().getRequestDispatcher(modelView.getView());
             dispatcher.forward(req, res);
         }
-       
-       
-       
-   } catch (Exception e) {
-    out.println("Exception1: " + e.getMessage());
-}
-}
-
-
-
-protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-    PrintWriter out = res.getWriter();
-    try {
-       Utilitaire utile = new Utilitaire();
-       String contextUrl = processRequest(res, req).replace("/","");
-       HashMap<String,Mapping> contextInfo = utile.getContextInformation(this.MappingUrls,contextUrl);
-   } catch (Exception e) {
-    out.println("Exception: " + e.getMessage());
-}
-}
-
-
-public String processRequest(HttpServletResponse res, HttpServletRequest req) throws Exception {
-    Utilitaire utile = new Utilitaire();
-    PrintWriter out = res.getWriter();
-    String result = "";
-    try{
-        StringBuffer url = req.getRequestURL();
-        result = utile.getContextUrl(url);
     }catch (Exception e) {
         out.println("Exception: " + e.getMessage());
     }
-    return result;
+    
 }
 
 }

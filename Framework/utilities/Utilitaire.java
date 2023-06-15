@@ -8,6 +8,8 @@ import javax.print.DocFlavor.STRING;
 import java.io.File;
 import etu1811.framework.Mapping;
 import etu1811.framework.ModelView;
+
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
@@ -75,6 +77,62 @@ public void setMappingUrls(HashMap<String,Mapping> map, Vector<Class<?>> allClas
 }
 }
 
+public void setAllClassSingleton(HashMap<String,Object> map, Vector<Class<?>> allClasses){
+    Vector<Class<?>> classes = new Vector<Class<?>>();
+    try{
+        classes = allClasses;
+        for (Class<?> class1 : classes) {
+             if (class1.isAnnotationPresent(Scope.class)) {
+                if(class1.getAnnotation(Scope.class).valeur().equals("singleton")){
+                    map.put(class1.getSimpleName(), class1.getDeclaredConstructor().newInstance());
+                }
+           }    
+   }
+
+}catch(Exception e){
+    System.out.println(e.getMessage());
+}
+}
+public boolean checkIfSingleton(Class<?> class1){
+    try{
+        if (class1.isAnnotationPresent(Scope.class)) {
+            if(class1.getAnnotation(Scope.class).valeur().equals("singleton")){
+               return true;
+            }
+       }   
+    }catch(Exception e){
+        System.out.println("Exception checkSingleton : "+e.getMessage());
+    }
+    return false;
+}
+
+public void resetAttribut(Object o){
+    try{
+        Field[] allFields =  o.getClass().getDeclaredFields();
+        for(Field f : allFields){
+            f.setAccessible(true);
+            f.set(o, null);
+        }
+    }catch(Exception e){
+        System.out.println("Exception resetAttribut : "+e.getMessage());
+    }
+}
+public Object getClassMatch(HashMap<String,Object> map,Class<?> class1){
+    Object o = new Object();
+    try{
+        for (String key : map.keySet()) {
+            if(key.equals(class1.getSimpleName())){
+                o = map.get(key);
+            }
+        }
+    }catch(Exception e){
+        System.out.println("Exception getClassMatch : "+e.getMessage());
+    }
+    return o;
+}
+
+
+
 public HashMap<String,Mapping> getContextInformation(HashMap<String,Mapping> MappingUrls,String annotationChemin){
     Mapping mapping;
     HashMap<String,Mapping> map = new  HashMap<String,Mapping>();
@@ -89,14 +147,14 @@ public HashMap<String,Mapping> getContextInformation(HashMap<String,Mapping> Map
     }
     return map;
 }
-public ModelView callFunction(HashMap<String,Mapping> map){
+public ModelView callFunction(HashMap<String,Mapping> map,Object newInstance){
     Class<?> myClass = null;
     ModelView modelView = null;
     try{
         for (String key : map.keySet()) {
             myClass = Class.forName(map.get(key).getClassName());
             Method method = myClass.getDeclaredMethod(map.get(key).getMethod());
-            modelView = (ModelView)method.invoke(myClass.getDeclaredConstructor().newInstance());
+            modelView = (ModelView)method.invoke(newInstance);
             
         }
     }catch (Exception e) {

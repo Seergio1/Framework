@@ -5,9 +5,9 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 
 	
-	@Target(ElementType.METHOD)
+	@Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)
-	public @interface MethodAnnotation{
-		String chemin();
+	public @interface Scope{
+		String valeur();
 	}
 	
