@@ -6,6 +6,7 @@ import java.util.Vector;
 
 import Annotation.*;
 
+@Scope(valeur = "singleton")
 public class Emp {
 	String nom;
 	int id;
@@ -42,7 +43,7 @@ public class Emp {
 		return this.prix;
 	}
 
-	@MethodAnnotation(chemin = "Emp-info.do", parametre = { "" })
+	@MethodAnnotation(chemin = "Emp-info.do")
 	public ModelView getInfo() {
 		Vector<String> allData = new Vector<String>();
 		allData.add("Sergio");
@@ -55,7 +56,7 @@ public class Emp {
 		return modeleView;
 	}
 
-	@MethodAnnotation(chemin = "Emp-form.do", parametre = { "" })
+	@MethodAnnotation(chemin = "Emp-form.do")
 	public ModelView makeForm() {
 		String urlHtml = "/form.jsp";
 		ModelView modeleView = new ModelView();
@@ -63,22 +64,29 @@ public class Emp {
 		return modeleView;
 	}
 
-	@MethodAnnotation(chemin = "Emp-save.do", parametre = { "" })
+	@MethodAnnotation(chemin = "Emp-save.do")
 	public ModelView save() {
 		String urlHtml = "/info2.jsp";
 		ModelView modeleView = new ModelView();
 		modeleView.setView(urlHtml);
 		return modeleView;
 	}
-	@MethodAnnotation(chemin = "Emp-saveByLink.do", parametre = { "" })
+	@MethodAnnotation(chemin = "Emp-saveByLink.do")
 	public ModelView saveByLink(){
 		String urlHtml = "/info2.jsp";
 		ModelView modeleView = new ModelView();
 		modeleView.setView(urlHtml);
 		return modeleView;
 	}
+	@MethodAnnotation(chemin = "Emp-upload.do")
+	public ModelView makeForm2() {
+		String urlHtml = "/upload.jsp";
+		ModelView modeleView = new ModelView();
+		modeleView.setView(urlHtml);
+		return modeleView;
+	}
 
-	@MethodAnnotation(chemin = "Emp-sayHello.do",parametre = {"mot","nbr"})
+	@MethodAnnotation(chemin = "Emp-sayHello.do")
 	public void sayHello(String mot,int nbr){
 		
 	}
