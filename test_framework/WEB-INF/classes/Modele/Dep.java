@@ -4,6 +4,7 @@ import etu1811.framework.*;
 
 import Annotation.*;
 
+@Scope(valeur = "singleton")
 public class Dep {
     public Dep() {
     }
