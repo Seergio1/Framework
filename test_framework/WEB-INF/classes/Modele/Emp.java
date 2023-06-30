@@ -1,21 +1,25 @@
 package Modele;
 import etu1811.framework.*;
+import utilities.Utilitaire;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.Vector;
 
 import Annotation.*;
 
-@Scope(valeur = "singleton")
+
 public class Emp {
 	String nom;
 	int id;
 	Double prix;
 	LocalDate dateNaissance;
+	int isAdmin; // 0 non 1 oui
 
 
 	
-	public Emp() {
+	
+    public Emp() {
 
 	}
 	public LocalDate getDateNaissance() {
@@ -42,7 +46,14 @@ public class Emp {
 	public Double getPrix(){
 		return this.prix;
 	}
+	public int getIsAdmin() {
+        return isAdmin;
+    }
+    public void setIsAdmin(int isAdmin) {
+        this.isAdmin = isAdmin;
+    }
 
+	@Auth(profil = "admin")
 	@MethodAnnotation(chemin = "Emp-info.do")
 	public ModelView getInfo() {
 		Vector<String> allData = new Vector<String>();
@@ -82,14 +93,79 @@ public class Emp {
 	public ModelView makeForm2() {
 		String urlHtml = "/upload.jsp";
 		ModelView modeleView = new ModelView();
+		
 		modeleView.setView(urlHtml);
 		return modeleView;
 	}
+	
 
 	@MethodAnnotation(chemin = "Emp-sayHello.do")
 	public void sayHello(String mot,int nbr){
 		
 	}
+
+
+	@MethodAnnotation(chemin = "Emp-makeFormLogin.do")
+	public ModelView makeFormLogin(){
+		String urlHtml = "/formLogin.jsp";
+		ModelView modelView = new ModelView();
+		modelView.setView(urlHtml);
+		return modelView;
+	}
+	@MethodAnnotation(chemin = "Emp-traitLogin.do")
+	public ModelView traitLogin(){
+		String urlHtml = "/traitementLogin.jsp";
+		ModelView modelView = new ModelView();
+		modelView.setView(urlHtml);
+		return modelView;
+	}
+
+	
+
+	@MethodAnnotation(chemin = "Emp-login.do")
+	public ModelView login(){
+		String urlHtml = "/index.jsp";
+		ModelView modelView = new ModelView();
+		
+		modelView.addSession("Profil", "admin");
+		modelView.setView(urlHtml);
+		return modelView;
+	}
+	
+	@MethodAnnotation(chemin = "Emp-login2.do")
+	public ModelView login2(){
+		String urlHtml = "/index.jsp";
+		ModelView modelView = new ModelView();
+		
+		modelView.addSession("Profil", "client");
+		modelView.setView(urlHtml);
+		return modelView;
+	}
+
+
+	@MethodAnnotation(chemin = "Emp-logOut.do")
+	public ModelView logOut(){
+		String urlHtml = "/formLogin.jsp";
+		ModelView modelView = new ModelView();
+		
+		modelView.addSession("Profil", null);
+		modelView.setView(urlHtml);
+		return modelView;
+	}
+	public static void main(String[] args) {
+		Utilitaire utile = new Utilitaire();
+		
+		HashMap<String,Object> session = new HashMap<String,Object>();
+		HashMap<String,Mapping> contextInfo = new HashMap<String,Mapping>();
+		Mapping mapping = new Mapping();
+		mapping.setClassName("Modele.Emp");
+		mapping.setMethod("getInfo");
+		contextInfo.put("Emp-info.do", mapping);
+		session.put("Profil", "admin");
+	}
+
+
+	
 
 
 

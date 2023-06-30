@@ -5,6 +5,8 @@ import java.io.File;
 public class ModelView{
 	String view;
 	HashMap<String,Object> data = new HashMap<String,Object>();
+	HashMap<String,Object> session = new HashMap<String,Object>();
+	
 	String pathUpload;
 	
 
@@ -50,5 +52,11 @@ public class ModelView{
 
 	public void addItem(String nomVariable,Object valeurVariable){
 		this.data.put(nomVariable,valeurVariable);
+	}
+	public void addSession(String nomVariable,Object valeurVariable){
+		this.session.put(nomVariable,valeurVariable);
+	}
+	public HashMap<String, Object> getSession() {
+		return session;
 	}
 }

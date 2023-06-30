@@ -155,7 +155,6 @@ public ModelView callFunction(HashMap<String,Mapping> map,Object newInstance){
             myClass = Class.forName(map.get(key).getClassName());
             Method method = myClass.getDeclaredMethod(map.get(key).getMethod());
             modelView = (ModelView)method.invoke(newInstance);
-            
         }
     }catch (Exception e) {
         System.out.println(e.getMessage());
@@ -212,7 +211,48 @@ public Method getMethodWithParam(Method[] allMethods,String annotation){
 }
     return resultat;
 }
-
+public Method getMethodCalled(HashMap<String,Mapping> map,Class<?> myClass){
+    Method meth = null;
+    try {
+        for (String key : map.keySet()) {
+            meth =  myClass.getDeclaredMethod(map.get(key).getMethod());
+        }
+    } catch (Exception e) {
+        System.out.println(e.getMessage());
+    }
+    return meth;
+}
+// public boolean checkAuthFunction(HashMap<String,Object> session,HashMap<String,Mapping> map,Class<?> myClass){
+//     boolean auth = false;
+//     try {
+        
+//             Method meth =  getMethodCalled(map,myClass);
+//             System.out.println(meth.getDeclaredAnnotation(Auth.class).profil());
+//             for (String key : session.keySet()) {
+//                 if(key.equals("Profil")){
+//                     if(meth.getDeclaredAnnotation(Auth.class).profil().equals((String)session.get(key))){
+//                         auth = true;
+//                     }
+//                 }
+//             }
+        
+//     } catch (Exception e) {
+//         System.out.println(e.getMessage());
+//     }
+//     return auth;
+// }
+public boolean checkAuthFunction(HashMap<String,Mapping> map,Class<?> myClass){
+    boolean auth = false;
+    try {
+        Method meth = getMethodCalled(map, myClass);
+        if(meth.isAnnotationPresent(Auth.class)){
+            auth = true;
+        }
+    } catch (Exception e) {
+        System.out.println(e.getMessage());
+    }
+    return auth;
+}
 
 
 

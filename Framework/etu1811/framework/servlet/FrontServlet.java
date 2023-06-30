@@ -15,6 +15,9 @@ import etu1811.framework.FileUpload;
 import etu1811.framework.Mapping;
 import etu1811.framework.ModelView;
 import java.util.Vector;
+
+import javax.print.DocFlavor.STRING;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -28,7 +31,9 @@ import Annotation.*;
 public class FrontServlet extends HttpServlet {
     HashMap<String, Mapping> MappingUrls;
     HashMap<String,Object> allClassSingleton; 
+    HashMap<String,Object> Allsession;
     Vector<Class<?>> classes;
+    ModelView modelView;
 
     @Override
     public void init()throws ServletException{ 
@@ -73,6 +78,7 @@ protected void doPost(HttpServletRequest req, HttpServletResponse res) throws Se
 }
 
 
+
 public void processRequest(HttpServletResponse res, HttpServletRequest req) throws Exception {
     Utilitaire utile = new Utilitaire();
     PrintWriter out = res.getWriter();
@@ -85,21 +91,54 @@ public void processRequest(HttpServletResponse res, HttpServletRequest req) thro
       
         Class<?> class1 = Class.forName(contextInfo.get(contextUrl).getClassName());
         Object o;
+        
         if(utile.checkIfSingleton(class1)){
             o = utile.getClassMatch(this.allClassSingleton,class1);
             utile.resetAttribut(o);
-            out.println(o);
+            // out.println(o);
         }else{
             o = class1.getDeclaredConstructor().newInstance();
-            out.println(o);
+            // out.println(o);
         }
         
-        ModelView modelView = utile.callFunction(contextInfo,o);
+
+        if(utile.checkAuthFunction(contextInfo, o.getClass())){
+            
+            String checkProfil = this.getInitParameter("session_nom");
+            HttpSession session_ = req.getSession();
+            if(session_.getAttribute(checkProfil)!=null){
+                Method methodAuth = utile.getMethodCalled(contextInfo, class1);
+                
+                if(methodAuth.getDeclaredAnnotation(Auth.class).profil().equals(session_.getAttribute(checkProfil))){
+                    this.modelView = utile.callFunction(contextInfo,o);
+                }else{
+                    throw new Exception("Vous n'avez pas acces a cette fonction");
+                }
+                
+            }else{
+                throw new Exception("vous n'avez pas connecte");
+            }
+        }else{
+            this.modelView = utile.callFunction(contextInfo,o);
+            if(modelView.getSession()!=null){
+                this.Allsession = modelView.getSession();
+                HttpSession session = req.getSession();
+                for(String key : this.Allsession.keySet()){
+                    session.setAttribute(key, this.Allsession.get(key));
+                }
+            }
+        }
+        
+        
+        
+
         Field[] fields = o.getClass().getDeclaredFields();
         Method[] method = o.getClass().getDeclaredMethods(); //toutes les methodes présent
         Method resultat = utile.getMethodWithParam(method, contextUrl);//methode appelée
         String fieldname;
         String value;
+
+
 
         
         
@@ -190,6 +229,8 @@ public void processRequest(HttpServletResponse res, HttpServletRequest req) thro
                     req.setAttribute(nomVariable,data.get(nomVariable));
                 }
             }
+            
+            
             
             RequestDispatcher dispatcher = req.getServletContext().getRequestDispatcher(modelView.getView());
             dispatcher.forward(req, res);
