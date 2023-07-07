@@ -6,12 +6,13 @@ public class ModelView{
 	String view;
 	HashMap<String,Object> data = new HashMap<String,Object>();
 	HashMap<String,Object> session = new HashMap<String,Object>();
-	
 	String pathUpload;
+	boolean isJson; //sprint 13
 	
 
-
 	
+	
+
 
 
 	// Constructor
@@ -59,4 +60,12 @@ public class ModelView{
 	public HashMap<String, Object> getSession() {
 		return session;
 	}
+	public boolean getIsJson() {
+		return isJson;
+	}
+
+	public void setIsJson(boolean isJson) {
+		this.isJson = isJson;
+	}
+
 }

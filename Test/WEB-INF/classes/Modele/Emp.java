@@ -9,17 +9,25 @@ import java.util.Vector;
 import Annotation.*;
 
 
+
 public class Emp {
 	String nom;
 	int id;
 	Double prix;
 	LocalDate dateNaissance;
 	int isAdmin; // 0 non 1 oui
+	HashMap<String,Object> allSession = new HashMap<String,Object>();
 
 
 	
 	
-    public Emp() {
+    public HashMap<String, Object> getAllSession() {
+		return allSession;
+	}
+	public void setAllSession(String key,Object valeur) {
+		this.allSession.put(key, valeur);
+	}
+	public Emp() {
 
 	}
 	public LocalDate getDateNaissance() {
@@ -99,10 +107,7 @@ public class Emp {
 	}
 	
 
-	@MethodAnnotation(chemin = "Emp-sayHello.do")
-	public void sayHello(String mot,int nbr){
-		
-	}
+	
 
 
 	@MethodAnnotation(chemin = "Emp-makeFormLogin.do")
@@ -152,6 +157,45 @@ public class Emp {
 		modelView.setView(urlHtml);
 		return modelView;
 	}
+
+	//fonction pour tester sprint 13
+	@MethodAnnotation(chemin = "Emp-dataToJson.do")
+	public ModelView dataToJson(){
+		ModelView modelView = new ModelView();
+		Vector<String> allData = new Vector<String>();
+		allData.add("Sergio");
+		allData.add("ETU001811");
+		allData.add("W-63");
+		modelView.addItem("allData",allData);
+		modelView.setIsJson(true);
+		return modelView;
+	}
+	//fonction pour tester sprint 14
+	@restAPI(retour = "Json")
+	@MethodAnnotation(chemin = "Emp-findAll.do")
+	public Vector<Dep> findAll(){
+		Vector<Dep> allDep = new Vector<Dep>();
+		Dep dep1 = new Dep();
+		Dep dep2 = new Dep();
+		dep1.setNomDep("Alcatel");
+		dep2.setNomDep("Nokia");
+		allDep.add(dep1);
+		allDep.add(dep2);
+		return allDep;
+	} 
+
+	@Session(action = "recuperation")
+	@MethodAnnotation(chemin = "Emp-recupererTousLesSession.do")
+	public ModelView recupererTousLesSession(){
+		ModelView modelView = new ModelView();
+		String urlString = "/index.jsp";
+		String nomProfil = (String)this.getAllSession().get("Profil");
+		modelView.addItem("nomProfil", nomProfil);
+		modelView.setView(urlString);
+		return modelView;
+	}
+
+
 	public static void main(String[] args) {
 		Utilitaire utile = new Utilitaire();
 		
@@ -162,7 +206,10 @@ public class Emp {
 		mapping.setMethod("getInfo");
 		contextInfo.put("Emp-info.do", mapping);
 		session.put("Profil", "admin");
+		
 	}
+
+
 
 
 	

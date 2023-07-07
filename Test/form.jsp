@@ -15,7 +15,6 @@
 	<form action="Emp-save.do" method="get">
 		<input type="text" name="nom" placeholder="nom">
 		<input type="text" name="prix" placeholder="prix">
-		<input type="date" name="dateNaissance">
 		<input type="submit" value="valider">
 	</form>
 	<a href="Emp-saveByLink.do?id=1">mot de passe</a>
