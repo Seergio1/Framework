@@ -5,6 +5,8 @@ import java.util.Vector;
 
 import javax.print.DocFlavor.STRING;
 
+import com.google.gson.Gson;
+
 import java.io.File;
 import etu1811.framework.Mapping;
 import etu1811.framework.ModelView;
@@ -12,6 +14,7 @@ import etu1811.framework.ModelView;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import com.google.gson.Gson;
 
 import Annotation.*;
 
@@ -157,7 +160,7 @@ public ModelView callFunction(HashMap<String,Mapping> map,Object newInstance){
             modelView = (ModelView)method.invoke(newInstance);
         }
     }catch (Exception e) {
-        System.out.println(e.getMessage());
+        System.out.println("callFunction "+e.getMessage());
     }
     return modelView;
     
@@ -222,25 +225,7 @@ public Method getMethodCalled(HashMap<String,Mapping> map,Class<?> myClass){
     }
     return meth;
 }
-// public boolean checkAuthFunction(HashMap<String,Object> session,HashMap<String,Mapping> map,Class<?> myClass){
-//     boolean auth = false;
-//     try {
-        
-//             Method meth =  getMethodCalled(map,myClass);
-//             System.out.println(meth.getDeclaredAnnotation(Auth.class).profil());
-//             for (String key : session.keySet()) {
-//                 if(key.equals("Profil")){
-//                     if(meth.getDeclaredAnnotation(Auth.class).profil().equals((String)session.get(key))){
-//                         auth = true;
-//                     }
-//                 }
-//             }
-        
-//     } catch (Exception e) {
-//         System.out.println(e.getMessage());
-//     }
-//     return auth;
-// }
+
 public boolean checkAuthFunction(HashMap<String,Mapping> map,Class<?> myClass){
     boolean auth = false;
     try {
@@ -252,6 +237,59 @@ public boolean checkAuthFunction(HashMap<String,Mapping> map,Class<?> myClass){
         System.out.println(e.getMessage());
     }
     return auth;
+}
+
+public boolean checkMethodJson(HashMap<String,Mapping> map,Class<?> myClass){
+    boolean json = false;
+    try {
+        Method meth = getMethodCalled(map, myClass);
+        if(meth.isAnnotationPresent(restAPI.class)){
+            json = true;
+        }
+    } catch (Exception e) {
+        System.out.println(e.getMessage());
+    }
+    return json;
+}
+public String returnJson(HashMap<String,Mapping> map,Class<?> myClass,Object newInstance){
+    String dataJson = null;
+    try{
+        Gson gson = new Gson();
+        Method meth = getMethodCalled(map, myClass);
+        Class<?> returnType = meth.getReturnType();
+        Object returnValue =  meth.invoke(newInstance);
+        dataJson = gson.toJson(returnType.cast(returnValue));
+
+    }catch (Exception e) {
+        System.out.println(e.getMessage());
+    }
+    return dataJson;
+    
+}
+public boolean checkIfReturnModelView(HashMap<String,Mapping> map,Class<?> myClass){
+    boolean check = false;
+    try {
+        Method meth = getMethodCalled(map, myClass);
+        Class<?> returnType = meth.getReturnType();
+        if(returnType.getSimpleName().toString().equals("ModelView")){
+            check = true;
+        }
+    } catch (Exception e) {
+        System.out.println(e.getMessage());
+    }
+    return check;
+}
+public boolean checkIfWantSession(HashMap<String,Mapping> map,Class<?> myClass){
+    boolean check = false;
+    try {
+        Method meth = getMethodCalled(map, myClass);
+        if(meth.isAnnotationPresent(Session.class)){
+            check = true;
+        }
+    } catch (Exception e) {
+        System.out.println(e.getMessage());
+    }
+    return check;
 }
 
 

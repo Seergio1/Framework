@@ -1,0 +1,1 @@
+javac -cp "../lib/framework.jar" Modele/*.java
